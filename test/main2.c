@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <limits.h>
 #define RED printf("\033[0;31m");
 #define BLUE printf("\033[0;34m");
@@ -59,7 +60,7 @@ int main(void)
     fflush(stdout);
     b = _printf("");
     cont = cont + output(a,b);
-    printf("\n---------------\n")
+    printf("\n---------------\n");
     printf("Test 4");
     printf("\nexpected: ");
     a = printf(NULL);
