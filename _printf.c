@@ -1,52 +1,78 @@
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stddef.h>
 #include "main.h"
+
+int (*printer_aux(char flag))(va_list);
+
 /**
- * _printf - printf copu
- * @format: format receive
- * Return: ret
+ * _printf - produces output according to a format.
+ * @format: format specifier.
+ * Return: number of characters printed.
  */
 int _printf(const char *format, ...)
 {
-	va_list p;
-	int i = 0, j = 0, ret = 0, fret = 0, flag = 0;
-	pr pf_s[] = {
-		{'s', print_string}, {'c', print_char}, {'%', print_percent},
-		{'d', print_int}, {'i', print_int},
-		{'\0', NULL}};
-	va_start(p, format);
-	if (format == NULL)
+	va_list arg;
+	int i, printed_chars = 0;
+
+	if (format == NULL || (format[0] == '%' && format[1] == '\0'))
 		return (-1);
-	for (i = 0; format != NULL && format[i] != '\0'; i++)
-	{	flag = 0;
-		if (format[i] == '%')
+
+	va_start(arg, format);
+	for (i = 0; format && format[i]; i++)
+	{
+		if (format[i] != '%')
 		{
-			if (format[i + 1] == '\0')
-				return (-1);
+			_putchar(format[i]);
+			printed_chars++;
+		}
+		else if (format[i + 1] == '\0')
+			return (-1);
+		else if (format[i + 1] == '%')
+		{
+			_putchar(format[i]);
+			printed_chars++;
 			i++;
-			for (j = 0; pf_s[j].c != '\0'; j++)
-				if (format[i] == pf_s[j].c)
-				{
-					fret += pf_s[j].f(p);
-					flag = 1;
-				}
+		}
+		else if (printer_aux(format[i + 1]) != NULL)
+		{
+			printed_chars = printed_chars + printer_aux(format[i + 1])(arg);
+			i++;
 		}
 		else
 		{
 			_putchar(format[i]);
-			ret++;
-			flag = 1;
-		}
-		if (flag == 0)
-		{
-			i--;
-			_putchar(37);
-			fret++;
+			printed_chars++;
 		}
 	}
-	ret += fret;
-	return (ret);
+	va_end(arg);
+
+	return (printed_chars);
+}
+
+/**
+ * printer_aux - auxiliar function for print with a specific format.
+ * @flag: format specifier
+ * Return: pointer to format function or NULL.
+ */
+int (*printer_aux(char flag))(va_list)
+{
+	printer_t arr[] = {
+		{'c', print_c},
+		{'s', print_s},
+		{'i', print_i},
+		{'d', print_i},
+		{'b', print_b},
+		{'u', print_u},
+		{'o', print_o},
+		{'x', print_x},
+		{'X', print_X},
+		{'r', print_r},
+		{'R', print_R},
+		{'\0', NULL}
+	};
+	int i;
+
+	for (i = 0; arr[i].flag != '\0'; i++)
+		if (flag == arr[i].flag)
+			break;
+
+	return (arr[i].function);
 }
